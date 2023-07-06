@@ -26,18 +26,12 @@ type MdAllHeaaderInfo struct {
 // マークダウン中の見出しパターン
 const mD_H_MATCH_PATTERN = `(?m)^#{1,6} +(.+)$`
 
-// const mD_H_MATCH_PATTERN = `(?m)^#{1,6} +(\p{P}+)$`
-
 // マークダウン中のリンク独自記法パターン
 const mD_AUTO_LINK_MATCH_PATTERN = `\[\{(.*?)\}\]`
-
-// const mD_AUTO_LINK_MATCH_PATTERN = `\[\{(\p{P}*?)\}\]`
 
 // 後方参照できなかった...
 // https://github.com/google/re2/wiki/Syntax
 const hTML_H_MATCH_PATTERN = `(?s)<(h\d)( ?[^<>]*)>(.*?)</(h\d)>`
-
-// const hTML_H_MATCH_PATTERN = `(?s)<(h\d)( ?[^<>]*)>(\p{P}*?)</(h\d)>`
 
 // const hTML_H_MATCH_PATTERN = `(?s)<(h\d)( ?[^<>]*)>(.*?)</\1>`
 
@@ -83,7 +77,6 @@ func NewMdAllHeaaderInfo(mdPathes access_md.MdPaths) (MdAllHeaaderInfo, error) {
 // 文字列部分、パス部分、ID部分に文字列を分割
 func splitStrPathId(target string) (string, string, string) {
 	// サブマッチより抽出
-	// exp := regexp.MustCompile(`^((?:\w[^#|]*\|)?)([^#|]+)((?:#[^#|]*)?)$`)
 	exp := regexp.MustCompile(`^((?:[^#|]+\|)?)([^#|]+)((?:#[^#|]*)?)$`)
 	match := exp.FindStringSubmatch(target)
 
