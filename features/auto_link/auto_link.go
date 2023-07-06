@@ -253,7 +253,7 @@ func AddIdForHtmlH(html string) string {
 			"<%s%s id=\"%s\">%s</%s>",
 			match[1],
 			match[2],
-			url.QueryEscape(match[3]),
+			match[3],
 			match[3],
 			match[4],
 		)
