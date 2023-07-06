@@ -149,7 +149,7 @@ func MakeDefaultLayoutBuilder(baseUrl string, assetsPath string, mdLayoutDir str
 	// 関数構築
 	return func(metaData md_parse.MetaData, convertedHtml template.HTML) gin.H {
 		ginH["title"] = metaData.Title
-		ginH["overview"] = metaData.Overview
+		ginH["overview"] = template.HTML(blackfriday.MarkdownCommon([]byte(metaData.Overview)))
 		ginH["breadcrumbs"] = auto_link.MakeBreadCrumbs(baseUrl, metaData.PageName, allHInfos, c.UrlSuffix)
 		for i := 1; i <= 6; i++ {
 			ginH["idlinks"+strconv.Itoa(i)] = auto_link.MakePageInnerPaths(baseUrl, metaData.PageName, i, allHInfos, c.UrlSuffix)
