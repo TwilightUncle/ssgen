@@ -233,7 +233,7 @@ func MakePageInnerPaths(baseUrl string, pagename string, depth int, allHeaderInf
 	for _, info := range allHeaderInfos.pageGroup[pagename] {
 		if info.depth == depth {
 			str, path, _ := makeReplaceStr(
-				info.id+"|"+pagename+"#"+info.id,
+				info.text+"|"+pagename+"#"+info.id,
 				baseUrl,
 				allHeaderInfos,
 				suffix,
