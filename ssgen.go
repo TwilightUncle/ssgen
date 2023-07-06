@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/TwilightUncle/ssgen/features/access_md"
 	"github.com/TwilightUncle/ssgen/features/auto_link"
@@ -149,6 +150,9 @@ func MakeDefaultLayoutBuilder(baseUrl string, assetsPath string, mdLayoutDir str
 	return func(metaData md_parse.MetaData, convertedHtml template.HTML) gin.H {
 		ginH["title"] = metaData.Title
 		ginH["breadcrumbs"] = auto_link.MakeBreadCrumbs(baseUrl, metaData.PageName, allHInfos, c.UrlSuffix)
+		for i := 1; i <= 6; i++ {
+			ginH["idlinks"+strconv.Itoa(i)] = auto_link.MakePageInnerPaths(baseUrl, metaData.PageName, i, allHInfos, c.UrlSuffix)
+		}
 		ginH["content"] = convertedHtml
 		return ginH
 	}, err

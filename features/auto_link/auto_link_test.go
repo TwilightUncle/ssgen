@@ -2,11 +2,12 @@ package auto_link
 
 import (
 	"fmt"
-	"github.com/TwilightUncle/ssgen/features/access_md"
-	"github.com/TwilightUncle/ssgen/helpers/testing_helper"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/TwilightUncle/ssgen/features/access_md"
+	"github.com/TwilightUncle/ssgen/helpers/testing_helper"
 )
 
 // テスト用データ定義
@@ -67,23 +68,19 @@ func TestGetMdHeaderInfos(t *testing.T) {
 
 	// 具体的な取得内容のテスト
 	wantInfos := [...]MdHeaderInfo{
-		{text: "def", pagename: "page1", id: "def"},
-		{text: "ghi", pagename: "page1", id: "ghi"},
-		{text: "jkl", pagename: "page1", id: "jkl"},
-		{text: "mno", pagename: "page1", id: "mno"},
-		{text: "pqr", pagename: "page1", id: "pqr"},
-		{text: "stu", pagename: "page1", id: "stu"},
+		{text: "def", pagename: "page1", id: "def", depth: 1},
+		{text: "ghi", pagename: "page1", id: "ghi", depth: 2},
+		{text: "jkl", pagename: "page1", id: "jkl", depth: 3},
+		{text: "mno", pagename: "page1", id: "mno", depth: 4},
+		{text: "pqr", pagename: "page1", id: "pqr", depth: 5},
+		{text: "stu", pagename: "page1", id: "stu", depth: 6},
 	}
 	for i, wantInfo := range wantInfos {
 		if infos[i] != wantInfo {
 			t.Errorf(
-				"Actual {text: %s, pagename: %s, id: %s}, want {text: %s, pagename: %s, id: %s}",
-				infos[i].text,
-				infos[i].pagename,
-				infos[i].id,
-				wantInfo.text,
-				wantInfo.pagename,
-				wantInfo.id,
+				"Actual [%+v], want [%+v]",
+				infos[i],
+				wantInfo,
 			)
 		}
 	}
@@ -97,15 +94,15 @@ func TestGetAllFileMdHeaderInfos(t *testing.T) {
 	}
 
 	wantInfos := map[string]MdHeaderInfo{
-		"ghi": {text: "ghi", pagename: "page1", id: "ghi"},
-		"jkl": {text: "jkl", pagename: "page1", id: "jkl"},
-		"mno": {text: "mno", pagename: "page1", id: "mno"},
-		"pqr": {text: "pqr", pagename: "page1", id: "pqr"},
-		"stu": {text: "stu", pagename: "page1", id: "stu"},
-		"zyx": {text: "zyx", pagename: "sub/page2", id: "zyx"},
-		"wvu": {text: "wvu", pagename: "sub/page2", id: "wvu"},
+		"ghi": {text: "ghi", pagename: "page1", id: "ghi", depth: 2},
+		"jkl": {text: "jkl", pagename: "page1", id: "jkl", depth: 3},
+		"mno": {text: "mno", pagename: "page1", id: "mno", depth: 4},
+		"pqr": {text: "pqr", pagename: "page1", id: "pqr", depth: 5},
+		"stu": {text: "stu", pagename: "page1", id: "stu", depth: 6},
+		"zyx": {text: "zyx", pagename: "sub/page2", id: "zyx", depth: 1},
+		"wvu": {text: "wvu", pagename: "sub/page2", id: "wvu", depth: 1},
 		// page2のdefで上書きされていること
-		"def": {text: "def", pagename: "sub/page2", id: "def"},
+		"def": {text: "def", pagename: "sub/page2", id: "def", depth: 1},
 	}
 	for key, wantInfo := range wantInfos {
 		if allHInfos.idMap[key] != wantInfo {
@@ -242,5 +239,22 @@ func TestMakeBreadCrumbs(t *testing.T) {
 	want := [2]string{"page2", baseUrl + "/sub/page2"}
 	if breadCrumbs[1] != want {
 		t.Errorf("Actual [%+v], want [%+v]", breadCrumbs[1], want)
+	}
+}
+
+func TestMakePageInnerPaths(t *testing.T) {
+	mdPaths := makeTestFileData(t)
+	const baseUrl = "http://hostname.test/root"
+
+	allHInfos, err1 := NewMdAllHeaaderInfo(mdPaths)
+	if err1 != nil {
+		t.Error(err1)
+	}
+
+	paths := MakePageInnerPaths(baseUrl, "page1", 2, allHInfos, "")
+
+	want := [2]string{"ghi", baseUrl + "/page1#ghi"}
+	if paths[0] != want {
+		t.Errorf("Actual [%+v], want [%+v]", paths[0], want)
 	}
 }

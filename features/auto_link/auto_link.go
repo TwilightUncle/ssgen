@@ -13,6 +13,7 @@ type MdHeaderInfo struct {
 	text     string
 	pagename string
 	id       string
+	depth    int
 }
 
 type MdAllHeaaderInfo struct {
@@ -24,7 +25,7 @@ type MdAllHeaaderInfo struct {
 }
 
 // マークダウン中の見出しパターン
-const mD_H_MATCH_PATTERN = `(?m)^#{1,6} +(.+)$`
+const mD_H_MATCH_PATTERN = `(?m)^(#{1,6}) +(.+)$`
 
 // マークダウン中のリンク独自記法パターン
 const mD_AUTO_LINK_MATCH_PATTERN = `\[\{(.*?)\}\]`
@@ -42,9 +43,10 @@ func getMdHeaderInfos(mdStr string, pagename string) []MdHeaderInfo {
 	var infos []MdHeaderInfo
 	for _, match := range exp.FindAllStringSubmatch(mdStr, -1) {
 		infos = append(infos, MdHeaderInfo{
-			text:     match[1],
+			text:     match[2],
 			pagename: pagename,
-			id:       url.QueryEscape(match[1]),
+			id:       url.QueryEscape(match[2]),
+			depth:    len(match[1]),
 		})
 	}
 	return infos
@@ -218,6 +220,26 @@ func MakeBreadCrumbs(baseUrl string, pagename string, allHeaderInfos MdAllHeaade
 			suffix,
 		)
 		result = append(result, [2]string{str, path})
+	}
+	return result
+}
+
+// 画面内のIDのリンクリストを取得
+// ページ内の目次等の生成用
+// depth - 検索するIDの#の数
+func MakePageInnerPaths(baseUrl string, pagename string, depth int, allHeaderInfos MdAllHeaaderInfo, suffix string) [][2]string {
+	result := make([][2]string, 0)
+
+	for _, info := range allHeaderInfos.pageGroup[pagename] {
+		if info.depth == depth {
+			str, path, _ := makeReplaceStr(
+				info.id+"|"+pagename+"#"+info.id,
+				baseUrl,
+				allHeaderInfos,
+				suffix,
+			)
+			result = append(result, [2]string{str, path})
+		}
 	}
 	return result
 }
