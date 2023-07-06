@@ -10,6 +10,7 @@ const mETADATA_MATCH_PATTERN = `(?s)^---(.*?)---`
 
 type MetaData struct {
 	Title    string `yaml:"title"`
+	Overview string `yaml:"overview"`
 	PageName string
 }
 
