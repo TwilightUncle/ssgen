@@ -115,6 +115,30 @@ func Initialize(fn func(core *Core) error) error {
 
 // テンプレートの組み上げ
 func MakeDefaultLayoutBuilder(baseUrl string, assetsPath string, mdLayoutDir string) (LayoutBuilder, error) {
+	// あらかじめレイアウト部品のビルドを実施
+	ginH, err := buildLayouts(assetsPath, mdLayoutDir)
+
+	// そのほか、htmlへ埋め込む変数
+	ginH["base_url"] = baseUrl
+	ginH["assets_path"] = baseUrl + "/" + assetsPath
+
+	allHInfos, _ := auto_link.NewMdAllHeaaderInfo(c.MdPaths)
+
+	// 関数構築
+	return func(metaData md_parse.MetaData, convertedHtml template.HTML) gin.H {
+		ginH["title"] = metaData.Title
+		ginH["overview"] = template.HTML(blackfriday.MarkdownCommon([]byte(metaData.Overview)))
+		ginH["breadcrumbs"] = auto_link.MakeBreadCrumbs(baseUrl, metaData.PageName, allHInfos, c.UrlSuffix)
+		for i := 1; i <= 6; i++ {
+			ginH["idlinks"+strconv.Itoa(i)] = auto_link.MakePageInnerPaths(baseUrl, metaData.PageName, i, allHInfos, c.UrlSuffix)
+		}
+		ginH["content"] = convertedHtml
+		return ginH
+	}, err
+}
+
+// ヘッダ、サイドバー、フッタをマークダウンからHTMLに変換する
+func buildLayouts(assetsPath string, mdLayoutDir string) (gin.H, error) {
 	layoutComponentPathes := map[string]string{
 		"header":  mdLayoutDir + "/_header.md",
 		"sidebar": mdLayoutDir + "/_sidebar.md",
@@ -139,24 +163,7 @@ func MakeDefaultLayoutBuilder(baseUrl string, assetsPath string, mdLayoutDir str
 		htmlBytes := blackfriday.MarkdownCommon(bytes)
 		ginH[key] = template.HTML(htmlBytes)
 	}
-
-	// そのほか、htmlへ埋め込む変数
-	ginH["base_url"] = baseUrl
-	ginH["assets_path"] = baseUrl + "/" + assetsPath
-
-	allHInfos, _ := auto_link.NewMdAllHeaaderInfo(c.MdPaths)
-
-	// 関数構築
-	return func(metaData md_parse.MetaData, convertedHtml template.HTML) gin.H {
-		ginH["title"] = metaData.Title
-		ginH["overview"] = template.HTML(blackfriday.MarkdownCommon([]byte(metaData.Overview)))
-		ginH["breadcrumbs"] = auto_link.MakeBreadCrumbs(baseUrl, metaData.PageName, allHInfos, c.UrlSuffix)
-		for i := 1; i <= 6; i++ {
-			ginH["idlinks"+strconv.Itoa(i)] = auto_link.MakePageInnerPaths(baseUrl, metaData.PageName, i, allHInfos, c.UrlSuffix)
-		}
-		ginH["content"] = convertedHtml
-		return ginH
-	}, err
+	return ginH, err
 }
 
 // マークダウンをHTMLへ変換
@@ -255,8 +262,8 @@ func copyAssets(assetsPaths access_md.MdPaths, filePath string) error {
 		return err
 	}
 
-	io.Copy(dest, src)
-	return nil
+	_, err = io.Copy(dest, src)
+	return err
 }
 
 // 配置されたmdよりすべてのHTMLファイルを出力する
@@ -290,11 +297,7 @@ func outputHtml(t *template.Template, mdPath string) error {
 	if err = os.MkdirAll(c.OutputDir+"/"+c.MdPaths.GetPageDir(mdPath), 0777); err != nil {
 		return err
 	}
-
-	if err = os.WriteFile(c.OutputDir+"/"+c.MdPaths.GetPageName(mdPath)+".html", buf.Bytes(), 0777); err != nil {
-		return err
-	}
-	return nil
+	return os.WriteFile(c.OutputDir+"/"+c.MdPaths.GetPageName(mdPath)+".html", buf.Bytes(), 0777)
 }
 
 // 静的ファイル生成の上、プレビュー
