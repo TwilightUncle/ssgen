@@ -32,7 +32,7 @@ const mD_AUTO_LINK_MATCH_PATTERN = `\[\{(.*?)\}\]`
 
 // 後方参照できなかった...
 // https://github.com/google/re2/wiki/Syntax
-const hTML_H_MATCH_PATTERN = `(?s)<(h\d)( ?[^<>]*)>(.*?)</(h\d)>`
+const hTML_H_MATCH_PATTERN = `(?s)<(?P<begintag>h\d)(?P<attrs> ?[^<>]*)>(?P<inner>(?:<a ?[^<>]*>)?(?P<text>[^<>]*)(?:</a>)?)</(?P<endtag>h\d)>`
 
 // const hTML_H_MATCH_PATTERN = `(?s)<(h\d)( ?[^<>]*)>(.*?)</\1>`
 
@@ -251,11 +251,11 @@ func AddIdForHtmlH(html string) string {
 		match := exp.FindStringSubmatch(str)
 		return fmt.Sprintf(
 			"<%s%s id=\"%s\">%s</%s>",
-			match[1],
-			match[2],
-			match[3],
-			match[3],
-			match[4],
+			match[exp.SubexpIndex("begintag")],
+			match[exp.SubexpIndex("attrs")],
+			match[exp.SubexpIndex("text")],
+			match[exp.SubexpIndex("inner")],
+			match[exp.SubexpIndex("endtag")],
 		)
 	})
 }
