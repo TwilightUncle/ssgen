@@ -253,7 +253,7 @@ func TestMakePageInnerPaths(t *testing.T) {
 
 	paths := MakePageInnerPaths(baseUrl, "page1", 2, allHInfos, "")
 
-	want := [2]string{"ghi", baseUrl + "/page1#ghi"}
+	want := [3]string{"ghi", baseUrl + "/page1#ghi", "ghi"}
 	if paths[0] != want {
 		t.Errorf("Actual [%+v], want [%+v]", paths[0], want)
 	}

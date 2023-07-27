@@ -227,8 +227,8 @@ func MakeBreadCrumbs(baseUrl string, pagename string, allHeaderInfos MdAllHeaade
 // 画面内のIDのリンクリストを取得
 // ページ内の目次等の生成用
 // depth - 検索するIDの#の数
-func MakePageInnerPaths(baseUrl string, pagename string, depth int, allHeaderInfos MdAllHeaaderInfo, suffix string) [][2]string {
-	result := make([][2]string, 0)
+func MakePageInnerPaths(baseUrl string, pagename string, depth int, allHeaderInfos MdAllHeaaderInfo, suffix string) [][3]string {
+	result := make([][3]string, 0)
 
 	for _, info := range allHeaderInfos.pageGroup[pagename] {
 		if info.depth == depth {
@@ -238,7 +238,7 @@ func MakePageInnerPaths(baseUrl string, pagename string, depth int, allHeaderInf
 				allHeaderInfos,
 				suffix,
 			)
-			result = append(result, [2]string{str, path})
+			result = append(result, [3]string{str, path, info.text})
 		}
 	}
 	return result
