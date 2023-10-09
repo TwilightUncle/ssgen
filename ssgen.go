@@ -140,9 +140,9 @@ func MakeDefaultLayoutBuilder(baseUrl string, assetsPath string, mdLayoutDir str
 // ヘッダ、サイドバー、フッタをマークダウンからHTMLに変換する
 func buildLayouts(assetsPath string, mdLayoutDir string) (gin.H, error) {
 	layoutComponentPathes := map[string]string{
-		"header":  mdLayoutDir + "/_header.md",
-		"sidebar": mdLayoutDir + "/_sidebar.md",
-		"footer":  mdLayoutDir + "/_footer.md",
+		"header":  filepath.Join(mdLayoutDir, "_header.md"),
+		"sidebar": filepath.Join(mdLayoutDir, "_sidebar.md"),
+		"footer":  filepath.Join(mdLayoutDir, "_footer.md"),
 	}
 
 	// html部品のマークダウンをhtml化
@@ -246,13 +246,13 @@ func copyAssetsAll() error {
 
 // 一つのファイルをコピー
 func copyAssets(assetsPaths access_md.MdPaths, filePath string) error {
-	assetsOutputDir := c.OutputDir + "/" + c.AssetsPath + "/"
-	if err := os.MkdirAll(assetsOutputDir+assetsPaths.GetPageDir(filePath), 0777); err != nil {
+	assetsOutputDir := filepath.Join(c.OutputDir, c.AssetsPath)
+	if err := os.MkdirAll(filepath.Join(assetsOutputDir, assetsPaths.GetPageDir(filePath)), 0777); err != nil {
 		return err
 	}
 
 	relPath, _ := filepath.Rel(assetsPaths.GetBaseDirPath(), filePath)
-	dest, err := os.Create(assetsOutputDir + relPath)
+	dest, err := os.Create(filepath.Join(assetsOutputDir, relPath))
 	if err != nil {
 		return err
 	}
@@ -269,7 +269,7 @@ func copyAssets(assetsPaths access_md.MdPaths, filePath string) error {
 // 配置されたmdよりすべてのHTMLファイルを出力する
 func outputHtmlAll() error {
 	// htmlテンプレート取得
-	t, err := template.ParseFiles(c.TemplateDir + "/" + c.TemplateHtmlName)
+	t, err := template.ParseFiles(filepath.Join(c.TemplateDir, c.TemplateHtmlName))
 	if err != nil {
 		return err
 	}
@@ -294,10 +294,10 @@ func outputHtml(t *template.Template, mdPath string) error {
 		return err
 	}
 
-	if err = os.MkdirAll(c.OutputDir+"/"+c.MdPaths.GetPageDir(mdPath), 0777); err != nil {
+	if err = os.MkdirAll(filepath.Join(c.OutputDir, c.MdPaths.GetPageDir(mdPath)), 0777); err != nil {
 		return err
 	}
-	return os.WriteFile(c.OutputDir+"/"+c.MdPaths.GetPageName(mdPath)+".html", buf.Bytes(), 0777)
+	return os.WriteFile(filepath.Join(c.OutputDir, c.MdPaths.GetPageName(mdPath)+".html"), buf.Bytes(), 0777)
 }
 
 // 静的ファイル生成の上、プレビュー

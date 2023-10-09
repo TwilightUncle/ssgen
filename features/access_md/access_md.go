@@ -49,9 +49,8 @@ func (p *MdPaths) GetPageName(path string) string {
 // ファイルを配置するディレクトリ名を生成
 func (p *MdPaths) GetPageDir(path string) string {
 	relPath, _ := filepath.Rel(p.GetBaseDirPath(), path)
-	splited := strings.Split(relPath, "/")
-	splited[len(splited)-1] = ""
-	return strings.Join(splited, "/")
+	dir, _ := filepath.Split(relPath)
+	return dir
 }
 
 // 全要素に関数を適用した結果スライスを返却
