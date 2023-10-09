@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/TwilightUncle/ssgen/features/access_md"
 	"github.com/TwilightUncle/ssgen/features/auto_link"
@@ -183,7 +184,7 @@ func convertToHtml(mdFilePath string) (md_parse.MetaData, []byte, error) {
 		return metaData, []byte{}, err
 	}
 
-	metaData.PageName = c.MdPaths.GetPageName(mdFilePath)
+	metaData.PageName = strings.ReplaceAll(c.MdPaths.GetPageName(mdFilePath), "\\", "/")
 
 	// HTMLに変換の上ミドルウェア適用
 	return c.HtmlMiddlewareList.Apply(

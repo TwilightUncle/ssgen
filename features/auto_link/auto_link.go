@@ -44,7 +44,7 @@ func getMdHeaderInfos(mdStr string, pagename string) []MdHeaderInfo {
 	for _, match := range exp.FindAllStringSubmatch(mdStr, -1) {
 		infos = append(infos, MdHeaderInfo{
 			text:     match[2],
-			pagename: pagename,
+			pagename: strings.ReplaceAll(pagename, "\\", "/"),
 			id:       url.QueryEscape(match[2]),
 			depth:    len(match[1]),
 		})
