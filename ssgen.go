@@ -269,7 +269,9 @@ func copyAssets(assetsPaths access_md.MdPaths, filePath string) error {
 // 配置されたmdよりすべてのHTMLファイルを出力する
 func outputHtmlAll() error {
 	// htmlテンプレート取得
-	t, err := template.ParseFiles(filepath.Join(c.TemplateDir, c.TemplateHtmlName))
+	t, err := template.New(c.TemplateHtmlName).
+		Funcs(passFuncToTemplate()).
+		ParseFiles(filepath.Join(c.TemplateDir, c.TemplateHtmlName))
 	if err != nil {
 		return err
 	}
@@ -329,6 +331,7 @@ func RunPreviewServer() error {
 	router := gin.Default()
 	router.Static("/"+c.AssetsPath, c.AssetsPath)
 	router.LoadHTMLGlob(c.TemplateDir + "/*.html")
+	router.SetFuncMap(passFuncToTemplate())
 
 	// マークダウンのファイル配置よりroute作成
 	for _, mdPath := range c.MdPaths.GetAll() {
@@ -360,5 +363,16 @@ func makePreviewHandler(mdPath string) func(con *gin.Context) {
 			c.TemplateHtmlName,
 			c.LayoutBuilder(metaData, template.HTML(htmlBytes)),
 		)
+	}
+}
+
+func passFuncToTemplate() template.FuncMap {
+	return template.FuncMap{
+		"safeAttr": func(s string) template.HTMLAttr {
+			return template.HTMLAttr(s)
+		},
+		"safeHTML": func(s string) template.HTML {
+			return template.HTML(s)
+		},
 	}
 }
